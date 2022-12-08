@@ -2,6 +2,22 @@
 
 A simple UI for creating and interacting with a Molten funding contract.
 
+## Installing
+
+You need to link this repo to the `molten` repo (npm pacakge `@molten/core`).
+
+First go the to `molten` repo and do:
+
+```bash
+forge build
+```
+
+Then come back to the folder of this repo and do:
+
+```bash
+npm link <path to molten repo>
+```
+
 ## Developing
 
 ```bash
