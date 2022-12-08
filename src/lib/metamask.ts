@@ -1,20 +1,22 @@
 import { ethers } from 'ethers';
 
-import { signer } from '$lib/stores';
+type Handler = (signer: ethers.providers.JsonRpcSigner | null) => void;
 
-export async function updateSigner(accounts: string[]) {
+export async function getSigner(accounts: string[]) {
 	if (accounts.length === 0) {
-		signer.set(null);
+		return null;
 	} else {
-		signer.set(new ethers.providers.Web3Provider(window.ethereum).getSigner());
+		return new ethers.providers.Web3Provider(window.ethereum).getSigner();
 	}
 }
 
-export async function setupListeners() {
+export async function setupListeners(handler: Handler) {
 	teardownListeners();
-	window.ethereum.on('accountsChanged', updateSigner);
+	window.ethereum.on('accountsChanged', async (accounts: string[]) => {
+		handler(await getSigner(accounts));
+	});
 }
 
 export async function teardownListeners() {
-	window.ethereum.removeListener('accountsChanged', updateSigner);
+	window.ethereum.removeAllListeners();
 }
