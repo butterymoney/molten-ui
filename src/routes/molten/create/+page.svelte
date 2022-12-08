@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
 	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
-
 	import { signer } from '$lib/stores';
 	import Form, { type FormMeta, type SubmitData } from '$lib/components/Form.svelte';
 	import Input from '$lib/components/Input.svelte';
-	import Errors from '$lib/components/Errors.svelte';
+	import InputErrors from '$lib/components/InputErrors.svelte';
 	import { required, isAddress, type ValidatorFn } from '$lib/validators';
 
 	const unsignedMoltenFactory = ethers.ContractFactory.fromSolidity(MOLTEN_FUNDING_CONTRACT);
@@ -57,11 +56,11 @@
 			name="daoTokenAddress"
 			value="0x49E30Ae70C314A5b6f95cAF9E891eD20485195E4"
 		/>
-		<Errors fieldName="daoTokenAddress" />
+		<InputErrors fieldName="daoTokenAddress" />
 	</div>
 	<div>
 		<Input label="Locking duration (in days)" name="_lockingDuration" placeholder="365" />
-		<Errors fieldName="_lockingDuration" />
+		<InputErrors fieldName="_lockingDuration" />
 	</div>
 	<div>
 		<Input
@@ -70,7 +69,7 @@
 			name="depositTokenAddress"
 			value="0xb9d450a832785b66d4f99849ad664bcf9eaeacd5"
 		/>
-		<Errors fieldName="depositTokenAddress" />
+		<InputErrors fieldName="depositTokenAddress" />
 	</div>
 	<div>
 		<Input
@@ -79,7 +78,7 @@
 			name="_daoTreasuryAddress"
 			value="0x35495dc87c7a569b097932ab0ffaccec9e1309e0"
 		/>
-		<Errors fieldName="_daoTreasuryAddress" />
+		<InputErrors fieldName="_daoTreasuryAddress" />
 	</div>
 	<div>
 		<Input
@@ -88,7 +87,7 @@
 			name="uniswapV3OracleAddress"
 			value="0x7849342c3ef5ac4292b39de4dca7e76fe94732eb"
 		/>
-		<Errors fieldName="uniswapV3OracleAddress" />
+		<InputErrors fieldName="uniswapV3OracleAddress" />
 	</div>
 	<div class="input-disabled">
 		<Input
@@ -98,7 +97,7 @@
 			placeholder="0x4242…"
 			disabled
 		/>
-		<Errors fieldName="_uniswapV3OraclePools" />
+		<InputErrors fieldName="_uniswapV3OraclePools" />
 	</div>
 	<div class="input-disabled">
 		<label for="_uniswapV3OracleTokens">Uniswap token path</label>
@@ -116,7 +115,7 @@
 			placeholder="0x4242…"
 			disabled
 		/>
-		<Errors fieldName="_uniswapV3OracleTokens" />
+		<InputErrors fieldName="_uniswapV3OracleTokens" />
 	</div>
 	<div class="input-disabled">
 		<Input
@@ -125,7 +124,7 @@
 			placeholder="7"
 			disabled
 		/>
-		<Errors fieldName="_uniswapV3OraclePeriod" />
+		<InputErrors fieldName="_uniswapV3OraclePeriod" />
 	</div>
 	<button type="submit" disabled={$signer === null}>Create</button>
 </Form>

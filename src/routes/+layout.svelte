@@ -2,7 +2,7 @@
 	import { ethers } from 'ethers';
 
 	import { signer } from '$lib/stores';
-	import { updateSigner, setupListeners } from '$lib/metamask';
+	import { getSigner, setupListeners } from '$lib/metamask';
 
 	async function getCurrentAddress() {
 		if ($signer) {
@@ -22,9 +22,11 @@
 		$signer = null;
 	}
 
-	setupListeners();
+	setupListeners((_signer) => {$signer = _signer});
 	(async () => {
-		updateSigner(await new ethers.providers.Web3Provider(window.ethereum).send('eth_requestAccounts', []));
+		$signer = await getSigner(
+			await new ethers.providers.Web3Provider(window.ethereum).send('eth_requestAccounts', [])
+		);
 	})();
 </script>
 
