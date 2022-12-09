@@ -13,7 +13,12 @@
 	import { writable, type Writable } from 'svelte/store';
 	import type { ValidatorFn, ValidatorResult } from '$lib/validators';
 
+	let formEl: HTMLFormElement;
+
 	export let formMeta: FormMeta;
+	export function reset() {
+		formEl.reset();
+	}
 
 	const dispatch = createEventDispatcher<{ submit: SubmitData }>();
 	let errors = writable({} as FormErrors);
@@ -61,10 +66,11 @@
 	function onBlur(this: HTMLInputElement) {
 		$errors[this.name] = { ...$errors[this.name], ...validateField(this.name, this.value) };
 	}
+
 	setContext('form', { errors, onBlur } as FormContext);
 </script>
 
-<form on:submit|preventDefault={onSubmit}>
+<form on:submit|preventDefault={onSubmit} bind:this={formEl}>
 	<slot />
 </form>
 
