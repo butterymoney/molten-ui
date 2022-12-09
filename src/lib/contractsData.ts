@@ -15,30 +15,34 @@ const objectPromise: (obj: { [key: string]: any }) => Promise<{ [key: string]: a
 	obj
 ) => objectZip(Object.keys(obj), await Promise.all(Object.values(obj)));
 
-export const loadContractsData = async (address: string) => {
+export const loadMoltenFunding = async (address: string) => {
 	// ⚠️ Sepolia only for now:
 	const provider = ethers.getDefaultProvider(11155111);
 	const moltenContract = new ethers.Contract(address, MOLTEN_FUNDING_CONTRACT.abi, provider);
-	const moltenFunding = (await objectPromise({
+	const contractData = (await objectPromise({
 		address: address,
 		totalDeposited: moltenContract.totalDeposited(),
 		depositToken: moltenContract.depositToken()
 	})) as { address: string; totalDeposited: ethers.BigNumber; depositToken: string };
+	return {
+		...contractData,
+		totalDeposited: contractData.totalDeposited.toBigInt()
+	};
+};
 
+export const loadDepositToken = async (
+	moltenFunding: Awaited<ReturnType<typeof loadMoltenFunding>>
+) => {
+	// ⚠️ Sepolia only for now:
+	const provider = ethers.getDefaultProvider(11155111);
 	const depositTokenContract = new ethers.Contract(moltenFunding.depositToken, ERC20_ABI, provider);
-	const depositToken = (await objectPromise({
+	const contractData = (await objectPromise({
 		name: depositTokenContract.name(),
 		symbol: depositTokenContract.symbol(),
 		decimals: depositTokenContract.decimals()
 	})) as { name: string; symbol: string; decimals: number };
-
-	return {
-		moltenFunding: {
-			...moltenFunding,
-			totalDeposited: moltenFunding.totalDeposited.toBigInt()
-		},
-		depositToken
-	};
+	return contractData;
 };
 
-export type ContractsData = Awaited<ReturnType<typeof loadContractsData>>;
+export type MoltenFundingData = Awaited<ReturnType<typeof loadMoltenFunding>>
+export type DepositTokenData = Awaited<ReturnType<typeof loadDepositToken>>

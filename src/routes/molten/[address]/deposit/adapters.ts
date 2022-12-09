@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
 import ERC20_ABI from '$lib/abis/erc20.json';
-import type { LoadData } from './+page';
+import type {MoltenFundingData} from '$lib/contractsData'
 
 export class TxValidationError extends Error {
 	name = 'TxValidationError';
@@ -9,17 +9,17 @@ export class TxValidationError extends Error {
 
 export const updateAllowance = async (
 	signer: ethers.providers.JsonRpcSigner,
-	loadData: LoadData,
+	moltenFundingData: MoltenFundingData,
 	amount: bigint
 ) => {
 	const signerAddress = await signer.getAddress();
 	const depositContract = new ethers.Contract(
-		loadData.moltenFunding.depositToken,
+		moltenFundingData.depositToken,
 		ERC20_ABI,
 		signer
 	);
 	const allowance = (
-		await depositContract.allowance(signerAddress, loadData.moltenFunding.address)
+		await depositContract.allowance(signerAddress, moltenFundingData.address)
 	).toBigInt();
 
 	if (amount <= allowance) {
@@ -27,7 +27,7 @@ export const updateAllowance = async (
 	}
 
 	const tx = (await depositContract.approve(
-		loadData.moltenFunding.address,
+		moltenFundingData.address,
 		amount
 	)) as ethers.ContractTransaction;
 	return tx;
@@ -35,11 +35,11 @@ export const updateAllowance = async (
 
 export const deposit = async (
 	signer: ethers.providers.JsonRpcSigner,
-	loadData: LoadData,
+	moltenFundingData: MoltenFundingData,
 	amount: bigint
 ) => {
 	const moltenContract = new ethers.Contract(
-		loadData.moltenFunding.address,
+		moltenFundingData.address,
 		MOLTEN_FUNDING_CONTRACT.abi,
 		signer
 	);
@@ -49,11 +49,11 @@ export const deposit = async (
 
 export const refund = async (
 	signer: ethers.providers.JsonRpcSigner,
-	loadData: LoadData,
+	moltenFundingData: MoltenFundingData,
 	amount: bigint
 ) => {
 	const moltenContract = new ethers.Contract(
-		loadData.moltenFunding.address,
+		moltenFundingData.address,
 		MOLTEN_FUNDING_CONTRACT.abi,
 		signer
 	);
@@ -61,9 +61,9 @@ export const refund = async (
 	return tx;
 };
 
-export const depositTokenBalance = async (loadData: LoadData, address: string) => {
+export const depositTokenBalance = async (moltenFundingData: MoltenFundingData, address: string) => {
 	const depositContract = new ethers.Contract(
-		loadData.moltenFunding.depositToken,
+		moltenFundingData.depositToken,
 		ERC20_ABI,
 		// ⚠️ Sepolia only for now:
 		ethers.getDefaultProvider(11155111)
@@ -71,9 +71,9 @@ export const depositTokenBalance = async (loadData: LoadData, address: string) =
 	return ((await depositContract.balanceOf(address)) as ethers.BigNumber).toBigInt();
 };
 
-export const deposited = async (loadData: LoadData, address: string) => {
+export const deposited = async (moltenFundingData: MoltenFundingData, address: string) => {
 	const moltenContract = new ethers.Contract(
-		loadData.moltenFunding.address,
+		moltenFundingData.address,
 		MOLTEN_FUNDING_CONTRACT.abi,
 		// ⚠️ Sepolia only for now:
 		ethers.getDefaultProvider(11155111)
