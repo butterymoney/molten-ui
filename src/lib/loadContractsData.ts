@@ -1,8 +1,6 @@
 import { ethers } from 'ethers';
-import type { PageLoad } from './$types';
 import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
 import ERC20_ABI from '$lib/abis/erc20.json';
-import type { xlink_attr } from 'svelte/internal';
 
 // 🙏 https://stackoverflow.com/a/44054159/931156
 const objectZip: (keys: string[], values: any[]) => { [key: string]: any } = (keys, values) =>
@@ -17,7 +15,7 @@ const objectPromise: (obj: { [key: string]: any }) => Promise<{ [key: string]: a
 	obj
 ) => objectZip(Object.keys(obj), await Promise.all(Object.values(obj)));
 
-const loadContractsData = async (address: string) => {
+export const loadContractsData = async (address: string) => {
 	// ⚠️ Sepolia only for now:
 	const provider = ethers.getDefaultProvider(11155111);
 	const moltenContract = new ethers.Contract(address, MOLTEN_FUNDING_CONTRACT.abi, provider);
@@ -36,13 +34,11 @@ const loadContractsData = async (address: string) => {
 
 	return {
 		moltenFunding: {
-            ...moltenFunding,
-            totalDeposited: moltenFunding.totalDeposited.toBigInt()
-        },
+			...moltenFunding,
+			totalDeposited: moltenFunding.totalDeposited.toBigInt()
+		},
 		depositToken
 	};
 };
 
-export type LoadData = Awaited<ReturnType<typeof loadContractsData>>;
-
-export const load: PageLoad = async ({ params }) => await loadContractsData(params.address);
+export type ContractsData = Awaited<ReturnType<typeof loadContractsData>>;

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
 	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
-	import type { PageData } from './$types';
 	import { page } from '$app/stores';
-	import { signer } from '$lib/stores';
+	import { contractsData, signer } from '$lib/stores';
 	import Form, { type FormMeta, type SubmitData } from '$lib/components/Form.svelte';
 	import Input from '$lib/components/Input.svelte';
 	import Errors from '$lib/components/InputErrors.svelte';
@@ -19,7 +18,6 @@
 		TxValidationError
 	} from './adapters';
 
-	export let data: PageData;
 	let lock = false;
 	let tokensBalance: bigint, tokensDeposited: bigint;
 
@@ -50,13 +48,14 @@
 		depositError = '';
 		depositNotifications = [];
 		lock = true;
-		const amount = BigInt(e.detail.data.amount) * 10n ** BigInt(data.depositToken.decimals);
+		const amount =
+			BigInt(e.detail.data.amount) * 10n ** BigInt($contractsData.depositToken.decimals);
 
 		let allowanceTx: ethers.ContractTransaction | undefined;
 		let depositTx: ethers.ContractTransaction | undefined;
 		try {
 			try {
-				allowanceTx = await updateAllowance($signer, data, amount);
+				allowanceTx = await updateAllowance($signer, $contractsData, amount);
 			} finally {
 				if (allowanceTx) {
 					depositNotifications = [
@@ -67,7 +66,7 @@
 					depositNotifications = [
 						...depositNotifications,
 						`✅ Updated ${
-							data.depositToken.name
+							$contractsData.depositToken.name
 						} allowance for Molten funding contract ${$page.params.address.slice(0, 6)} to ${BigInt(
 							e.detail.data.amount
 						)}…`
@@ -76,7 +75,7 @@
 			}
 
 			try {
-				depositTx = await deposit($signer, data, amount);
+				depositTx = await deposit($signer, $contractsData, amount);
 			} finally {
 				if (depositTx) {
 					depositNotifications = [
@@ -86,7 +85,9 @@
 					depositReceipt = await depositTx.wait();
 					depositNotifications = [
 						...depositNotifications,
-						`✅ Completed deposit of ${BigInt(e.detail.data.amount)} ${data.depositToken.symbol}`
+						`✅ Completed deposit of ${BigInt(e.detail.data.amount)} ${
+							$contractsData.depositToken.symbol
+						}`
 					];
 				}
 			}
@@ -106,10 +107,11 @@
 
 	$: {
 		($signer &&
+			$contractsData &&
 			(async () => {
 				tokensBalance =
-					(await depositTokenBalance(data, await $signer.getAddress())) /
-					10n ** BigInt(data.depositToken.decimals);
+					(await depositTokenBalance($contractsData, await $signer.getAddress())) /
+					10n ** BigInt($contractsData.depositToken.decimals);
 			})()) ||
 			depositReceipt ||
 			refundReceipt; // [XXX] Could be more simply managed by sub-components and {#key}
@@ -139,12 +141,13 @@
 		refundError = '';
 		refundNotifications = [];
 		lock = true;
-		const amount = BigInt(e.detail.data.amount) * 10n ** BigInt(data.depositToken.decimals);
+		const amount =
+			BigInt(e.detail.data.amount) * 10n ** BigInt($contractsData.depositToken.decimals);
 
 		let refundTx: ethers.ContractTransaction | undefined;
 		try {
 			try {
-				refundTx = await refund($signer, data, amount);
+				refundTx = await refund($signer, $contractsData, amount);
 			} finally {
 				if (refundTx) {
 					refundNotifications = [
@@ -154,7 +157,9 @@
 					refundReceipt = await refundTx.wait();
 					refundNotifications = [
 						...refundNotifications,
-						`✅ Completed refund of ${BigInt(e.detail.data.amount)} ${data.depositToken.symbol}`
+						`✅ Completed refund of ${BigInt(e.detail.data.amount)} ${
+							$contractsData.depositToken.symbol
+						}`
 					];
 				}
 			}
@@ -174,50 +179,57 @@
 
 	$: {
 		($signer &&
+			$contractsData &&
 			(async () => {
 				tokensDeposited =
-					(await deposited(data, await $signer.getAddress())) /
-					10n ** BigInt(data.depositToken.decimals);
+					(await deposited($contractsData, await $signer.getAddress())) /
+					10n ** BigInt($contractsData.depositToken.decimals);
 			})()) ||
 			depositReceipt ||
 			refundReceipt;
 	}
 </script>
 
-<h1>Deposit {data.depositToken.name} in contract {$page.params.address.slice(0, 6)}…</h1>
+{#if $contractsData}
+	<h1>
+		Deposit {$contractsData.depositToken.name} in contract {$page.params.address.slice(0, 6)}…
+	</h1>
 
-<Form formMeta={depositFormMeta} on:submit={submitDeposit} bind:this={depositForm}>
-	<h2>Deposit</h2>
-	{#if tokensBalance}
-		<p>{tokensBalance} {data.depositToken.symbol} available.</p>
-	{/if}
-	<div>
-		<Input label="Amount" name="amount" type="number" min="0" max={tokensBalance} />
-		<Errors fieldName="amount" />
-	</div>
-	<button type="submit" disabled={$signer === null || lock}>Deposit</button>
-	{#if depositError}
-		<Error message={depositError} />
-	{/if}
-	{#if depositNotifications.length}
-		<Notification messages={depositNotifications} />
-	{/if}
-</Form>
+	<Form formMeta={depositFormMeta} on:submit={submitDeposit} bind:this={depositForm}>
+		<h2>Deposit</h2>
+		{#if tokensBalance}
+			<p>{tokensBalance} {$contractsData.depositToken.symbol} available.</p>
+		{/if}
+		<div>
+			<Input label="Amount" name="amount" type="number" min="0" max={tokensBalance} />
+			<Errors fieldName="amount" />
+		</div>
+		<button type="submit" disabled={$signer === null || lock}>Deposit</button>
+		{#if depositError}
+			<Error message={depositError} />
+		{/if}
+		{#if depositNotifications.length}
+			<Notification messages={depositNotifications} />
+		{/if}
+	</Form>
 
-<Form formMeta={refundFormMeta} on:submit={submitRefund} bind:this={refundForm}>
-	<h2>Withdraw</h2>
-	{#if tokensDeposited}
-		<p>{tokensDeposited} {data.depositToken.symbol} currently deposited.</p>
-	{/if}
-	<div>
-		<Input label="Amount" name="amount" type="number" min="0" max={tokensDeposited} />
-		<Errors fieldName="amount" />
-	</div>
-	<button type="submit" disabled={$signer === null || lock}>Withdraw</button>
-	{#if refundError}
-		<Error message={refundError} />
-	{/if}
-	{#if refundNotifications.length}
-		<Notification messages={refundNotifications} />
-	{/if}
-</Form>
+	<Form formMeta={refundFormMeta} on:submit={submitRefund} bind:this={refundForm}>
+		<h2>Withdraw</h2>
+		{#if tokensDeposited}
+			<p>{tokensDeposited} {$contractsData.depositToken.symbol} currently deposited.</p>
+		{/if}
+		<div>
+			<Input label="Amount" name="amount" type="number" min="0" max={tokensDeposited} />
+			<Errors fieldName="amount" />
+		</div>
+		<button type="submit" disabled={$signer === null || lock}>Withdraw</button>
+		{#if refundError}
+			<Error message={refundError} />
+		{/if}
+		{#if refundNotifications.length}
+			<Notification messages={refundNotifications} />
+		{/if}
+	</Form>
+{:else}
+	<h1>Deposit in contract {$page.params.address.slice(0, 6)}…</h1>
+{/if}

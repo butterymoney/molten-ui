@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
-
 	import { signer } from '$lib/stores';
-	import { getSigner, setupListeners } from '$lib/metamask';
+
 
 	async function getCurrentAddress() {
 		if ($signer) {
@@ -18,23 +17,13 @@
 		return $signer.getAddress();
 	}
 
-	async function disconnect() {
-		$signer = null;
-	}
-
-	setupListeners((_signer) => {$signer = _signer});
-	(async () => {
-		$signer = await getSigner(
-			await new ethers.providers.Web3Provider(window.ethereum).send('eth_requestAccounts', [])
-		);
-	})();
 </script>
 
 <header>
 	{#key $signer}
 		{#await getCurrentAddress() then addr}
 			{#if addr}
-				<span>{addr.slice(0, 6)}… <button on:click={disconnect}>Log out</button></span>
+				<span>{addr.slice(0, 6)}…</span>
 			{:else}
 				<button on:click={connect}>Connect with Metamask</button>
 			{/if}
