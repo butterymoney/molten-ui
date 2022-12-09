@@ -30,7 +30,6 @@
 	}
 	function validateField(fieldName: string, value: string): ValidatorResult {
 		return {
-			...$errors[fieldName], // [XXX] Try to remove this
 			...formMeta[fieldName].validators.reduce(
 				(inputErrorsAcc, validator) => ({
 					...inputErrorsAcc,

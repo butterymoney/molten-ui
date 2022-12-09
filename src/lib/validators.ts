@@ -11,5 +11,5 @@ export const required: ValidatorFn = (value) => ({
 });
 
 export const isAddress: ValidatorFn = (value) => ({
-	isAddress: ethers.utils.isAddress(value) ? null : 'Not an address'
+	isAddress: ethers.utils.isAddress(value.toLowerCase()) ? null : 'Not an address'
 });

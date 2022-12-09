@@ -105,12 +105,14 @@
 	};
 
 	$: {
-		$signer &&
+		($signer &&
 			(async () => {
 				tokensBalance =
 					(await depositTokenBalance(data, await $signer.getAddress())) /
 					10n ** BigInt(data.depositToken.decimals);
-			})() || depositReceipt || refundReceipt; // [XXX] Could be more simply managed by sub-components and {#key}
+			})()) ||
+			depositReceipt ||
+			refundReceipt; // [XXX] Could be more simply managed by sub-components and {#key}
 	}
 
 	const refundInputs = moltenFundingInterface.getFunction('refund').inputs;
@@ -171,12 +173,14 @@
 	};
 
 	$: {
-		$signer &&
+		($signer &&
 			(async () => {
 				tokensDeposited =
 					(await deposited(data, await $signer.getAddress())) /
 					10n ** BigInt(data.depositToken.decimals);
-			})() || depositReceipt || refundReceipt;
+			})()) ||
+			depositReceipt ||
+			refundReceipt;
 	}
 </script>
 
