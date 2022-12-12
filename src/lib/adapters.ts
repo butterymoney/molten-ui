@@ -1,23 +1,19 @@
 import { ethers } from 'ethers';
 import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
 import ERC20_ABI from '$lib/abis/erc20.json';
-import type {MoltenFundingData} from '$lib/contractsData'
+import type { MoltenFundingData } from '$lib/contractsData';
 
 export class TxValidationError extends Error {
 	name = 'TxValidationError';
 }
 
-export const updateAllowance = async (
+export const updateDepositTokenAllowance = async (
 	signer: ethers.providers.JsonRpcSigner,
 	moltenFundingData: MoltenFundingData,
 	amount: bigint
 ) => {
 	const signerAddress = await signer.getAddress();
-	const depositContract = new ethers.Contract(
-		moltenFundingData.depositToken,
-		ERC20_ABI,
-		signer
-	);
+	const depositContract = new ethers.Contract(moltenFundingData.depositToken, ERC20_ABI, signer);
 	const allowance = (
 		await depositContract.allowance(signerAddress, moltenFundingData.address)
 	).toBigInt();
@@ -29,6 +25,27 @@ export const updateAllowance = async (
 	const tx = (await depositContract.approve(
 		moltenFundingData.address,
 		amount
+	)) as ethers.ContractTransaction;
+	return tx;
+};
+
+export const setInfiniteDaoTokenAllowance = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
+	const signerAddress = await signer.getAddress();
+	const daoTokenContract = new ethers.Contract(moltenFundingData.daoToken, ERC20_ABI, signer);
+	const allowance = (
+		await daoTokenContract.allowance(signerAddress, moltenFundingData.address)
+	).toBigInt();
+
+	if (allowance == ethers.constants.MaxUint256) {
+		return;
+	}
+
+	const tx = (await daoTokenContract.approve(
+		moltenFundingData.address,
+		ethers.constants.MaxUint256
 	)) as ethers.ContractTransaction;
 	return tx;
 };
@@ -61,22 +78,29 @@ export const refund = async (
 	return tx;
 };
 
-export const depositTokenBalance = async (moltenFundingData: MoltenFundingData, address: string) => {
-	const depositContract = new ethers.Contract(
-		moltenFundingData.depositToken,
-		ERC20_ABI,
-		// ⚠️ Sepolia only for now:
-		ethers.getDefaultProvider(11155111)
-	);
-	return ((await depositContract.balanceOf(address)) as ethers.BigNumber).toBigInt();
-};
+// export const depositTokenBalance = async (
+// 	moltenFundingData: MoltenFundingData,
+// 	address: string
+// ) => {
+// 	const depositContract = new ethers.Contract(
+// 		moltenFundingData.depositToken,
+// 		ERC20_ABI,
+// 		// ⚠️ Sepolia only for now:
+// 		ethers.getDefaultProvider(11155111)
+// 	);
+// 	return ((await depositContract.balanceOf(address)) as ethers.BigNumber).toBigInt();
+// };
 
-export const deposited = async (moltenFundingData: MoltenFundingData, address: string) => {
+
+export const exchange = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
 	const moltenContract = new ethers.Contract(
 		moltenFundingData.address,
 		MOLTEN_FUNDING_CONTRACT.abi,
-		// ⚠️ Sepolia only for now:
-		ethers.getDefaultProvider(11155111)
+		signer
 	);
-	return ((await moltenContract.deposited(address)) as ethers.BigNumber).toBigInt();
+	const tx = (await moltenContract.exchange()) as ethers.ContractTransaction;
+	return tx;
 };

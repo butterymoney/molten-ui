@@ -4,7 +4,7 @@
 
 <ul>
 	{#each messages as m}
-		<li class="notif-message">{m}</li>
+		<li class="notif-message">{@html m}</li>
 	{/each}
 </ul>
 
