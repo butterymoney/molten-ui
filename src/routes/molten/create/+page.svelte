@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
 	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
-	import { signer } from '$lib/stores';
+	import { signer, moltenStateUpdates } from '$lib/stores';
+	import { required, isAddress, type ValidatorFn } from '$lib/validators';
 	import Form, { type FormMeta, type SubmitData } from '$lib/components/Form.svelte';
 	import Input from '$lib/components/Input.svelte';
 	import InputErrors from '$lib/components/InputErrors.svelte';
-	import { required, isAddress, type ValidatorFn } from '$lib/validators';
+	import Error from '$lib/components/Error.svelte';
+	import Notification from '$lib/components/Notification.svelte';
 
 	const unsignedMoltenFactory = ethers.ContractFactory.fromSolidity(MOLTEN_FUNDING_CONTRACT);
 	const constructorInputs = unsignedMoltenFactory.interface.deploy.inputs;
@@ -29,21 +31,52 @@
 		)
 	);
 
-	function submitCreation(e: CustomEvent<SubmitData>) {
-		if ($signer !== null && e?.detail?.valid) {
-			const moltenFactory = unsignedMoltenFactory.connect($signer);
-			const args = constructorInputs.map(({ name }) => e.detail.data[name] || defaultValues[name]);
-			console.log('Deploy - args', args);
-			console.log(
-				'Deploy - abi-encoded args',
-				ethers.utils.defaultAbiCoder.encode(
-					constructorInputs.map(({ type }) => type),
-					args
-				)
-			);
-			moltenFactory.deploy(...args);
+	let lock = false,
+		error = '',
+		notifications: string[] = [];
+
+	const submitCreation = async (e: CustomEvent<SubmitData>) => {
+		if ($signer === null || !e?.detail?.valid) return;
+
+		error = '';
+		notifications = [];
+		lock = true;
+
+		let contract: ethers.Contract | undefined, receipt: ethers.providers.TransactionReceipt;
+
+		const moltenFactory = unsignedMoltenFactory.connect($signer);
+		const args = constructorInputs.map(({ name }) => e.detail.data[name] || defaultValues[name]);
+		console.log('Deploy args', args);
+		console.log(
+			'Deploy abi-encoded args',
+			ethers.utils.defaultAbiCoder.encode(
+				constructorInputs.map(({ type }) => type),
+				args
+			)
+		);
+
+		try {
+			try {
+				contract = await moltenFactory.deploy(...args);
+			} finally {
+				if (contract) {
+					notifications = [...notifications, '⏱ Awaiting deploy transaction to validate…'];
+					receipt = await contract.deployTransaction.wait();
+					notifications = [
+						...notifications,
+						`✅ Created Molten funding contract at ${contract.address} ` +
+							`(<a href="https://sepolia.etherscan.io/tx/${receipt.transactionHash}">tx</a>).`
+					];
+					$moltenStateUpdates = [...$moltenStateUpdates, receipt];
+				}
+			}
+		} catch (err) {
+			error = 'Transaction aborted';
+			return;
+		} finally {
+			lock = false;
 		}
-	}
+	};
 </script>
 
 <h1>Create a Molten funding contract</h1>
@@ -126,7 +159,13 @@
 		/>
 		<InputErrors fieldName="_uniswapV3OraclePeriod" />
 	</div>
-	<button type="submit" disabled={$signer === null}>Create</button>
+	<button type="submit" disabled={$signer === null || lock}>Create</button>
+	{#if error}
+		<Error message={error} />
+	{/if}
+	{#if notifications.length}
+		<Notification messages={notifications} />
+	{/if}
 </Form>
 
 <style>
