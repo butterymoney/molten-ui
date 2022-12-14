@@ -19,9 +19,7 @@ export const loadMoltenFunding = async (
 	signer: ethers.providers.JsonRpcSigner,
 	address: string
 ) => {
-	// ⚠️ Sepolia only for now:
-	const provider = signer || ethers.getDefaultProvider(11155111);
-	const contract = new ethers.Contract(address, MOLTEN_FUNDING_CONTRACT.abi, provider);
+	const contract = new ethers.Contract(address, MOLTEN_FUNDING_CONTRACT.abi, signer);
 	const contractData = (await objectPromise({
 		address: address,
 		candidateAddress: contract.candidateAddress(),
@@ -32,6 +30,9 @@ export const loadMoltenFunding = async (
 		daoTreasuryAddress: contract.daoTreasuryAddress(),
 		exchangeTime: contract.exchangeTime(),
 		exchangeRate: contract.exchangeRate(),
+		liquidationTime: contract.liquidationTime(),
+		lockingDuration: contract.lockingDuration(),
+		totalVotesForLiquidation: contract.totalVotesForLiquidation(),
 		_deposited: signer.getAddress().then(contract.deposited),
 		_mTokensClaimed: signer.getAddress().then(contract.mTokensClaimed)
 	})) as {
@@ -44,6 +45,9 @@ export const loadMoltenFunding = async (
 		daoTreasuryAddress: string;
 		exchangeTime: ethers.BigNumber;
 		exchangeRate: ethers.BigNumber;
+		liquidationTime: ethers.BigNumber;
+		lockingDuration: ethers.BigNumber;
+		totalVotesForLiquidation: ethers.BigNumber;
 		_deposited: ethers.BigNumber;
 		_mTokensClaimed: boolean;
 	};
@@ -52,6 +56,9 @@ export const loadMoltenFunding = async (
 		totalDeposited: contractData.totalDeposited.toBigInt(),
 		exchangeTime: new Date(Number(contractData.exchangeTime.toBigInt()) * 1000),
 		exchangeRate: contractData.exchangeRate.toBigInt(),
+		liquidationTime: new Date(Number(contractData.liquidationTime.toBigInt()) * 1000),
+		lockingDuration: Number(contractData.lockingDuration),
+		totalVotesForLiquidation: contractData.totalVotesForLiquidation.toBigInt(),
 		_deposited: contractData._deposited.toBigInt()
 	};
 };
@@ -60,9 +67,7 @@ export const loadDepositToken = async (
 	signer: ethers.providers.JsonRpcSigner,
 	moltenFunding: Awaited<ReturnType<typeof loadMoltenFunding>>
 ) => {
-	// ⚠️ Sepolia only for now:
-	const provider = signer || ethers.getDefaultProvider(11155111);
-	const contract = new ethers.Contract(moltenFunding.depositToken, ERC20_ABI, provider);
+	const contract = new ethers.Contract(moltenFunding.depositToken, ERC20_ABI, signer);
 	const contractData = (await objectPromise({
 		name: contract.name(),
 		symbol: contract.symbol(),
@@ -73,32 +78,41 @@ export const loadDepositToken = async (
 };
 
 export const loadDaoToken = async (
+	signer: ethers.providers.JsonRpcSigner,
 	moltenFunding: Awaited<ReturnType<typeof loadMoltenFunding>>
 ) => {
-	// ⚠️ Sepolia only for now:
-	const provider = ethers.getDefaultProvider(11155111);
-	const contract = new ethers.Contract(moltenFunding.daoToken, ERC20_ABI, provider);
-	const contractData = (await objectPromise({
-		name: contract.name(),
-		symbol: contract.symbol(),
-		decimals: contract.decimals()
-	})) as { name: string; symbol: string; decimals: number };
-	return contractData;
-};
-
-export const loadMToken = async (moltenFunding: Awaited<ReturnType<typeof loadMoltenFunding>>) => {
-	// ⚠️ Sepolia only for now:
-	const provider = ethers.getDefaultProvider(11155111);
-	const contract = new ethers.Contract(moltenFunding.mToken, ERC20_ABI, provider);
+	const contract = new ethers.Contract(moltenFunding.daoToken, ERC20_ABI, signer);
 	const contractData = (await objectPromise({
 		name: contract.name(),
 		symbol: contract.symbol(),
 		decimals: contract.decimals(),
-		totalSupply: contract.totalSupply()
-	})) as { name: string; symbol: string; decimals: number, totalSupply: ethers.BigNumber };
+		_moltenBalance: contract.balanceOf(moltenFunding.address)
+	})) as { name: string; symbol: string; decimals: number; _moltenBalance: ethers.BigNumber };
+	return { ...contractData, _moltenBalance: contractData._moltenBalance.toBigInt() };
+};
+
+export const loadMToken = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFunding: Awaited<ReturnType<typeof loadMoltenFunding>>
+) => {
+	const contract = new ethers.Contract(moltenFunding.mToken, ERC20_ABI, signer);
+	const contractData = (await objectPromise({
+		name: contract.name(),
+		symbol: contract.symbol(),
+		decimals: contract.decimals(),
+		totalSupply: contract.totalSupply(),
+		_balance: signer.getAddress().then(contract.balanceOf)
+	})) as {
+		name: string;
+		symbol: string;
+		decimals: number;
+		totalSupply: ethers.BigNumber;
+		_balance: ethers.BigNumber;
+	};
 	return {
 		...contractData,
-		totalSupply: contractData.totalSupply.toBigInt()
+		totalSupply: contractData.totalSupply.toBigInt(),
+		_balance: contractData._balance.toBigInt()
 	};
 };
 

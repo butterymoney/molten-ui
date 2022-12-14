@@ -84,7 +84,7 @@
 <h1>Exchange your treasury tokens for molten deposits</h1>
 {#if $moltenFundingData && $daoTokenData && $depositTokenData && signerAddress}
 	{#if $moltenFundingData.exchangeTime.valueOf() > 0}
-		<em>Exchange already happened.</em>
+		<em>Exchange already happened. You can now <a href="./claimMTokens">claim your mTokens</a>.</em>
 	{:else if signerAddress != $moltenFundingData.daoTreasuryAddress}
 		<em
 			>Exchange is only available to the DAO treasury address: {$moltenFundingData.daoTreasuryAddress.slice(
