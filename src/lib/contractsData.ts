@@ -28,23 +28,30 @@ export const loadMoltenFunding = async (
 		totalDeposited: contract.totalDeposited(),
 		depositToken: contract.depositToken(),
 		daoToken: contract.daoToken(),
+		mToken: contract.mToken(),
 		daoTreasuryAddress: contract.daoTreasuryAddress(),
 		exchangeTime: contract.exchangeTime(),
-		_deposited: signer.getAddress().then(contract.deposited)
+		exchangeRate: contract.exchangeRate(),
+		_deposited: signer.getAddress().then(contract.deposited),
+		_mTokensClaimed: signer.getAddress().then(contract.mTokensClaimed)
 	})) as {
 		address: string;
 		candidateAddress: string;
 		totalDeposited: ethers.BigNumber;
 		depositToken: string;
 		daoToken: string;
+		mToken: string;
 		daoTreasuryAddress: string;
 		exchangeTime: ethers.BigNumber;
+		exchangeRate: ethers.BigNumber;
 		_deposited: ethers.BigNumber;
+		_mTokensClaimed: boolean;
 	};
 	return {
 		...contractData,
 		totalDeposited: contractData.totalDeposited.toBigInt(),
 		exchangeTime: new Date(Number(contractData.exchangeTime.toBigInt()) * 1000),
+		exchangeRate: contractData.exchangeRate.toBigInt(),
 		_deposited: contractData._deposited.toBigInt()
 	};
 };
@@ -79,6 +86,23 @@ export const loadDaoToken = async (
 	return contractData;
 };
 
+export const loadMToken = async (moltenFunding: Awaited<ReturnType<typeof loadMoltenFunding>>) => {
+	// ⚠️ Sepolia only for now:
+	const provider = ethers.getDefaultProvider(11155111);
+	const contract = new ethers.Contract(moltenFunding.mToken, ERC20_ABI, provider);
+	const contractData = (await objectPromise({
+		name: contract.name(),
+		symbol: contract.symbol(),
+		decimals: contract.decimals(),
+		totalSupply: contract.totalSupply()
+	})) as { name: string; symbol: string; decimals: number, totalSupply: ethers.BigNumber };
+	return {
+		...contractData,
+		totalSupply: contractData.totalSupply.toBigInt()
+	};
+};
+
 export type MoltenFundingData = Awaited<ReturnType<typeof loadMoltenFunding>>;
 export type DepositTokenData = Awaited<ReturnType<typeof loadDepositToken>>;
 export type DaoTokenData = Awaited<ReturnType<typeof loadDaoToken>>;
+export type MTokenData = Awaited<ReturnType<typeof loadMToken>>;

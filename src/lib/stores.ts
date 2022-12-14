@@ -5,9 +5,11 @@ import {
 	loadDaoToken,
 	loadDepositToken,
 	loadMoltenFunding,
+	loadMToken,
 	type DaoTokenData,
 	type DepositTokenData,
-	type MoltenFundingData
+	type MoltenFundingData,
+	type MTokenData
 } from './contractsData';
 import { getSigner, setupListeners, teardownListeners } from './metamask';
 
@@ -31,14 +33,20 @@ export const moltenFundingData = derived<
 	$signer && loadMoltenFunding($signer, $page.params.address).then(set);
 });
 export const depositTokenData = derived<
-	[typeof signer, typeof moltenFundingData],
+	[typeof signer, typeof moltenFundingData, typeof moltenStateUpdates],
 	DepositTokenData
->([signer, moltenFundingData], ([$signer, $moltenFundingData], set) => {
+>([signer, moltenFundingData, moltenStateUpdates], ([$signer, $moltenFundingData], set) => {
 	$signer && $moltenFundingData && loadDepositToken($signer, $moltenFundingData).then(set);
 });
-export const daoTokenData = derived<typeof moltenFundingData, DaoTokenData>(
-	moltenFundingData,
-	($moltenFundingData, set) => {
+export const daoTokenData = derived<[typeof moltenFundingData, typeof moltenStateUpdates], DaoTokenData>(
+	[moltenFundingData, moltenStateUpdates],
+	([$moltenFundingData], set) => {
 		$moltenFundingData && loadDaoToken($moltenFundingData).then(set);
 	}
 );
+export const mTokenData = derived<[typeof moltenFundingData, typeof moltenStateUpdates], MTokenData> (
+	[moltenFundingData, moltenStateUpdates],
+	([$moltenFundingData], set) => {
+		$moltenFundingData && loadMToken($moltenFundingData).then(set);
+	}
+)

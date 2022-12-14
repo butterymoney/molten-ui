@@ -22,11 +22,10 @@ export const updateDepositTokenAllowance = async (
 		return;
 	}
 
-	const tx = (await depositContract.approve(
+	return (await depositContract.approve(
 		moltenFundingData.address,
 		amount
 	)) as ethers.ContractTransaction;
-	return tx;
 };
 
 export const setInfiniteDaoTokenAllowance = async (
@@ -43,11 +42,10 @@ export const setInfiniteDaoTokenAllowance = async (
 		return;
 	}
 
-	const tx = (await daoTokenContract.approve(
+	return (await daoTokenContract.approve(
 		moltenFundingData.address,
 		ethers.constants.MaxUint256
 	)) as ethers.ContractTransaction;
-	return tx;
 };
 
 export const deposit = async (
@@ -60,8 +58,7 @@ export const deposit = async (
 		MOLTEN_FUNDING_CONTRACT.abi,
 		signer
 	);
-	const tx = (await moltenContract.deposit(amount)) as ethers.ContractTransaction;
-	return tx;
+	return (await moltenContract.deposit(amount)) as ethers.ContractTransaction;
 };
 
 export const refund = async (
@@ -74,23 +71,8 @@ export const refund = async (
 		MOLTEN_FUNDING_CONTRACT.abi,
 		signer
 	);
-	const tx = (await moltenContract.refund(amount)) as ethers.ContractTransaction;
-	return tx;
+	return (await moltenContract.refund(amount)) as ethers.ContractTransaction;
 };
-
-// export const depositTokenBalance = async (
-// 	moltenFundingData: MoltenFundingData,
-// 	address: string
-// ) => {
-// 	const depositContract = new ethers.Contract(
-// 		moltenFundingData.depositToken,
-// 		ERC20_ABI,
-// 		// ⚠️ Sepolia only for now:
-// 		ethers.getDefaultProvider(11155111)
-// 	);
-// 	return ((await depositContract.balanceOf(address)) as ethers.BigNumber).toBigInt();
-// };
-
 
 export const exchange = async (
 	signer: ethers.providers.JsonRpcSigner,
@@ -101,6 +83,13 @@ export const exchange = async (
 		MOLTEN_FUNDING_CONTRACT.abi,
 		signer
 	);
-	const tx = (await moltenContract.exchange()) as ethers.ContractTransaction;
-	return tx;
+	return (await moltenContract.exchange()) as ethers.ContractTransaction;
 };
+
+export const claimMTokens = async(
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
+	const moltenContract = new ethers.Contract(moltenFundingData.address, MOLTEN_FUNDING_CONTRACT.abi, signer);
+	return (await moltenContract.claimMTokens()) as ethers.ContractTransaction;
+}
