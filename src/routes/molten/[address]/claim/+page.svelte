@@ -5,13 +5,14 @@
 		moltenFundingData,
 		moltenStateUpdates,
 		depositTokenData,
+		daoTokenData,
 		mTokenData,
 		signer
 	} from '$lib/stores';
 	import Form, { type SubmitData } from '$lib/components/Form.svelte';
 	import Error from '$lib/components/Error.svelte';
 	import Notification from '$lib/components/Notification.svelte';
-	import { claimMTokens } from '$lib/adapters';
+	import { claim } from '$lib/adapters';
 
 	let lock = false,
 		error = '',
@@ -30,12 +31,12 @@
 
 		try {
 			try {
-				tx = await claimMTokens($signer, $moltenFundingData);
+				tx = await claim($signer, $moltenFundingData);
 			} finally {
 				if (tx) {
 					notifications = [...notifications, '⏱ Awaiting transaction to validate…'];
 					const receipt = await tx.wait();
-					notifications = [...notifications, `✅ All mTokens claimed.`];
+					notifications = [...notifications, `✅ All ${$daoTokenData.name} claimed.`];
 					$moltenStateUpdates = [...$moltenStateUpdates, receipt];
 				}
 			}
@@ -47,27 +48,37 @@
 		}
 	};
 
-	// 👓 MoltenFunding.claimMTokens
+	// 👓 MoltenFunding.claim
 	const getClaimableMTokensBalance = () =>
 		($moltenFundingData._deposited * 10n ** BigInt($mTokenData.decimals)) /
 		$moltenFundingData.exchangeRate;
+	const getUnclaimedMTokenBalance = () =>
+		$moltenFundingData._mTokensClaimed ? 0n : getClaimableMTokensBalance();
+	const getClaimableBalance = () => $mTokenData._balance + getUnclaimedMTokenBalance();
 </script>
 
-{#if $moltenFundingData && $depositTokenData && $mTokenData}
-	<h1>Claim {$mTokenData.name}</h1>
+{#if $moltenFundingData && $depositTokenData && $daoTokenData}
+	<h1>Claim {$daoTokenData.name}</h1>
 	{#if $moltenFundingData.exchangeTime.valueOf() == 0}]
-		<em>{$mTokenData.name} not claimable: exchange not yet happened.</em>
-	{:else if $moltenFundingData.liquidationTime.valueOf() > 0}
+		<em>{$daoTokenData.name} not claimable: exchange not yet happened.</em>
+	{:else if $moltenFundingData.liquidationTime.valueOf() == 0}
+		<em>{$daoTokenData.name} not claimable: liquidation not yet happened.</em>
+	{:else if $mTokenData.totalSupply == 0n}
 		<em
-			>{$mTokenData.name} not claimable: liquidation already happened. You can now
-			<a href="../claim">claim your DAO tokens</a>.</em
+			>All {$mTokenData.name} burned. No more {$daoTokenData.name} to claim in this Molten funding contract.</em
 		>
-	{:else if $moltenFundingData._mTokensClaimed}
-		<em>{$mTokenData.name} already claimed.</em>
+	{:else if $mTokenData._balance == 0n}
+		<em
+			>You don't have any {$mTokenData.name}, so you can't claim any {$daoTokenData.name} held in this
+			contract.</em
+		>
 	{:else}
 		<Form {formMeta} on:submit={submitClaimMTokens}>
-			<h2>Claim mTokens</h2>
-			<p>{getClaimableMTokensBalance()} {$mTokenData.symbol} to claim.</p>
+			<h2>Claim DAO governance tokens</h2>
+			<p>
+				{getClaimableBalance() / 10n ** BigInt($daoTokenData.decimals)}
+				{$daoTokenData.symbol} to claim.
+			</p>
 			<button type="submit" disabled={$signer === null || lock}>Claim</button>
 			{#if error}
 				<Error message={error} />
@@ -78,5 +89,5 @@
 		</Form>
 	{/if}
 {:else}
-	<h1>Claim mTokens in Molten funding contract {$page.params.address.slice(0, 6)}…</h1>
+	<h1>Claim DAO tokens locked in Molten funding contract {$page.params.address.slice(0, 6)}…</h1>
 {/if}

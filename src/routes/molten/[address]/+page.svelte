@@ -20,10 +20,12 @@
 					exchanged yet{/if}
 			</li>
 			<li>
-				M tokens total: {$mTokenData.totalSupply / 10n**BigInt($mTokenData.decimals)}
+				{$mTokenData.name} total: {$mTokenData.totalSupply / 10n ** BigInt($mTokenData.decimals)}
+				{$mTokenData.symbol}
 			</li>
 			<li>
-				M tokens un-claimed: {$moltenFundingData.totalDeposited / $moltenFundingData.exchangeRate}
+				{#if $moltenFundingData.liquidationTime.valueOf() > 0}Liquidation happened on {$moltenFundingData.liquidationTime}{:else}Not
+					liquidated yet{/if}
 			</li>
 		</ul>
 	{/if}

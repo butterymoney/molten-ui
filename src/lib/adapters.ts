@@ -86,10 +86,39 @@ export const exchange = async (
 	return (await moltenContract.exchange()) as ethers.ContractTransaction;
 };
 
-export const claimMTokens = async(
+export const claimMTokens = async (
 	signer: ethers.providers.JsonRpcSigner,
 	moltenFundingData: MoltenFundingData
 ) => {
-	const moltenContract = new ethers.Contract(moltenFundingData.address, MOLTEN_FUNDING_CONTRACT.abi, signer);
+	const moltenContract = new ethers.Contract(
+		moltenFundingData.address,
+		MOLTEN_FUNDING_CONTRACT.abi,
+		signer
+	);
 	return (await moltenContract.claimMTokens()) as ethers.ContractTransaction;
-}
+};
+
+export const claim = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
+	const moltenContract = new ethers.Contract(
+		moltenFundingData.address,
+		MOLTEN_FUNDING_CONTRACT.abi,
+		signer
+	);
+	return (await moltenContract.claim()) as ethers.ContractTransaction;
+};
+
+export const liquidate = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
+	const moltenContract = new ethers.Contract(
+		moltenFundingData.address,
+		MOLTEN_FUNDING_CONTRACT.abi,
+		signer
+	);
+	return (await moltenContract.liquidate()) as ethers.ContractTransaction;
+};
+
