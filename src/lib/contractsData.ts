@@ -34,7 +34,8 @@ export const loadMoltenFunding = async (
 		lockingDuration: contract.lockingDuration(),
 		totalVotesForLiquidation: contract.totalVotesForLiquidation(),
 		_deposited: signer.getAddress().then(contract.deposited),
-		_mTokensClaimed: signer.getAddress().then(contract.mTokensClaimed)
+		_mTokensClaimed: signer.getAddress().then(contract.mTokensClaimed),
+		_votedForLiquidation: signer.getAddress().then(contract.votedForLiquidation)
 	})) as {
 		address: string;
 		candidateAddress: string;
@@ -50,6 +51,7 @@ export const loadMoltenFunding = async (
 		totalVotesForLiquidation: ethers.BigNumber;
 		_deposited: ethers.BigNumber;
 		_mTokensClaimed: boolean;
+		_votedForLiquidation: boolean;
 	};
 	return {
 		...contractData,

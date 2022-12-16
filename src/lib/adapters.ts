@@ -122,3 +122,28 @@ export const liquidate = async (
 	return (await moltenContract.liquidate()) as ethers.ContractTransaction;
 };
 
+export const voteForLiquidation = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
+	const moltenContract = new ethers.Contract(
+		moltenFundingData.address,
+		MOLTEN_FUNDING_CONTRACT.abi,
+		signer
+	);
+	return (await moltenContract.voteForLiquidation()) as ethers.ContractTransaction;
+};
+
+export const withdrawVoteForLiquidation = async (
+	signer: ethers.providers.JsonRpcSigner,
+	moltenFundingData: MoltenFundingData
+) => {
+	const moltenContract = new ethers.Contract(
+		moltenFundingData.address,
+		MOLTEN_FUNDING_CONTRACT.abi,
+		signer
+	);
+	return (await moltenContract.withdrawVoteForLiquidation()) as ethers.ContractTransaction;
+};
+
+// [TODO] Generate all the simple functions from the ABI.
