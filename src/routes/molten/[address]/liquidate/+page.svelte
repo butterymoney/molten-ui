@@ -51,7 +51,8 @@
 
 	// 👓 MoltenFunding.liquidate
 	const getLockEnd = () =>
-		$moltenFundingData.exchangeTime.valueOf() + $moltenFundingData.lockingDuration;
+		$moltenFundingData.exchangeTime.valueOf() +
+		$moltenFundingData.lockingDuration * 1000;
 	const getLockEnded = () => new Date().valueOf() >= getLockEnd();
 	const getUnanimousLiquidationVote = () =>
 		$moltenFundingData.totalVotesForLiquidation == $moltenFundingData.totalDeposited;
@@ -61,6 +62,8 @@
 {#if $moltenFundingData && $daoTokenData && $depositTokenData && $mTokenData}
 	{#if $moltenFundingData.liquidationTime.valueOf() > 0}
 		<em>Liquidation already happened. You can now <a href="./claim">claim your DAO tokens</a>.</em>
+	{:else if $moltenFundingData.exchangeTime.valueOf() == 0}
+		<em>Exchange not happended yet, nothing to liquidate.</em>
 	{:else if !getLockEnded() && !getUnanimousLiquidationVote()}
 		<em
 			>Liquidation not yet applicable.
@@ -68,7 +71,7 @@
 				<li>Time lock only ends on {new Date(getLockEnd())}.</li>
 				<li>
 					Liquidation votes are not unanimous, only {$moltenFundingData.totalVotesForLiquidation} on
-					{$moltenFundingData.totalDeposited} voted for it.
+					{$moltenFundingData.totalDeposited / 10n ** BigInt($depositTokenData.decimals)} voted for it.
 				</li>
 			</ul>
 		</em>

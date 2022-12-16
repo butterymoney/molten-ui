@@ -3,6 +3,7 @@
 	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
 	import { signer, moltenStateUpdates } from '$lib/stores';
 	import { required, isAddress, type ValidatorFn } from '$lib/validators';
+	import { daysToSeconds, type CleanerFn } from '$lib/cleaners';
 	import Form, { type FormMeta, type SubmitData } from '$lib/components/Form.svelte';
 	import Input from '$lib/components/Input.svelte';
 	import InputErrors from '$lib/components/InputErrors.svelte';
@@ -25,9 +26,10 @@
 				[
 					name,
 					{
-						validators: [required, ...(baseType === 'address' ? [isAddress] : [])]
+						validators: [required, ...(baseType === 'address' ? [isAddress] : [])],
+						cleaners: [...(name == '_lockingDuration' ? [daysToSeconds] : [])]
 					}
-				] as [string, { validators: ValidatorFn[] }]
+				] as [string, { validators: ValidatorFn[]; cleaners: CleanerFn[] }]
 		)
 	);
 
@@ -36,7 +38,9 @@
 		notifications: string[] = [];
 
 	const submitCreation = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		const cleanedData = e?.detail?.cleanedData;
+
+		if ($signer === null || !e?.detail?.valid || !cleanedData) return;
 
 		error = '';
 		notifications = [];
@@ -45,15 +49,7 @@
 		let contract: ethers.Contract | undefined, receipt: ethers.providers.TransactionReceipt;
 
 		const moltenFactory = unsignedMoltenFactory.connect($signer);
-		const args = constructorInputs.map(({ name }) => e.detail.data[name] || defaultValues[name]);
-		console.log('Deploy args', args);
-		console.log(
-			'Deploy abi-encoded args',
-			ethers.utils.defaultAbiCoder.encode(
-				constructorInputs.map(({ type }) => type),
-				args
-			)
-		);
+		const args = constructorInputs.map(({ name }) => cleanedData[name] || defaultValues[name]);
 
 		try {
 			try {

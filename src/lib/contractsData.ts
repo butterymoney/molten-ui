@@ -46,7 +46,7 @@ export const loadMoltenFunding = async (
 		exchangeTime: ethers.BigNumber;
 		exchangeRate: ethers.BigNumber;
 		liquidationTime: ethers.BigNumber;
-		lockingDuration: ethers.BigNumber;
+		lockingDuration: number;
 		totalVotesForLiquidation: ethers.BigNumber;
 		_deposited: ethers.BigNumber;
 		_mTokensClaimed: boolean;
@@ -57,7 +57,6 @@ export const loadMoltenFunding = async (
 		exchangeTime: new Date(Number(contractData.exchangeTime.toBigInt()) * 1000),
 		exchangeRate: contractData.exchangeRate.toBigInt(),
 		liquidationTime: new Date(Number(contractData.liquidationTime.toBigInt()) * 1000),
-		lockingDuration: Number(contractData.lockingDuration),
 		totalVotesForLiquidation: contractData.totalVotesForLiquidation.toBigInt(),
 		_deposited: contractData._deposited.toBigInt()
 	};
