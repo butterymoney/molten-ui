@@ -1,10 +1,13 @@
 <script context="module" lang="ts">
-	export type FormMeta = { [fieldName: string]: { validators: ValidatorFn[] } };
+	export type FormMeta = {
+		[fieldName: string]: { validators: ValidatorFn[]; cleaners: CleanerFn[] };
+	};
 	export type FormErrors = { [fieldName: string]: ValidatorResult };
 	export type FormContext = { errors: Writable<FormErrors>; onBlur: (event: Event) => void };
 	export type SubmitData = {
 		valid: boolean;
-		data: { [fieldName: string]: string };
+		rawData: { [fieldName: string]: string };
+		cleanedData?: { [fieldName: string]: any } | undefined;
 	};
 </script>
 
@@ -12,6 +15,7 @@
 	import { setContext, createEventDispatcher } from 'svelte';
 	import { writable, type Writable } from 'svelte/store';
 	import type { ValidatorFn, ValidatorResult } from '$lib/validators';
+	import type { CleanerFn } from '$lib/cleaners';
 
 	let formEl: HTMLFormElement;
 
@@ -23,44 +27,59 @@
 	const dispatch = createEventDispatcher<{ submit: SubmitData }>();
 	let errors = writable({} as FormErrors);
 
-	function isFormValid(errors: FormErrors): boolean {
-		return !Object.values(errors).some((fieldErrors) =>
+	const isFormValid = (errors: FormErrors) =>
+		!Object.values(errors).some((fieldErrors) =>
 			Object.values(fieldErrors).some((errorValue) => errorValue !== null)
 		);
-	}
-	function validateField(fieldName: string, value: string): ValidatorResult {
-		return {
-			...formMeta[fieldName].validators.reduce(
-				(inputErrorsAcc, validator) => ({
-					...inputErrorsAcc,
-					...validator(value)
-				}),
-				{} as ValidatorResult
-			)
-		};
-	}
-	function validateForm(data: { [fieldName: string]: string }): FormErrors {
-		return Object.entries(data).reduce(
+
+	const validateField = (fieldName: string, value: string): ValidatorResult =>
+		formMeta[fieldName].validators.reduce(
+			(inputErrorsAcc, validator) => ({
+				...inputErrorsAcc,
+				...validator(value)
+			}),
+			{} as ValidatorResult
+		);
+	const validateFormData = (data: { [fieldName: string]: string }): FormErrors =>
+		Object.entries(data).reduce(
 			(errorsAcc, [fieldName, value]) => ({
 				...errorsAcc,
 				[fieldName]: validateField(fieldName, value)
 			}),
 			{} as FormErrors
 		);
-	}
+	const cleanField = (fieldName: string, value: string): any =>
+		formMeta[fieldName].cleaners.reduce(
+			(cleanedValueAcc, cleaner) => cleaner(cleanedValueAcc),
+			value
+		);
+	const cleanFormData = (data: { [fieldName: string]: any }): { [fieldName: string]: any } =>
+		Object.entries(data).reduce(
+			(cleanedDataAcc, [fieldName, value]) => ({
+				...cleanedDataAcc,
+				[fieldName]: cleanField(fieldName, value)
+			}),
+			{} as { [fieldName: string]: any }
+		);
 	function onSubmit(this: HTMLFormElement) {
 		const formData = new FormData(this);
 
-		const data = Object.fromEntries(
+		const rawData = Object.fromEntries(
 			Array.from(formData.entries()).filter(
 				(fv): fv is [string, string] => typeof fv[1] === 'string'
 			)
 		);
-		const _errors = validateForm(data);
+		const _errors = validateFormData(rawData);
+		const isValid = isFormValid(_errors);
+		const submitData = {
+			valid: isValid,
+			rawData,
+			...(isValid ? { cleanedData: cleanFormData(rawData) } : {})
+		};
 
 		$errors = _errors;
 
-		return dispatch('submit', { valid: isFormValid(_errors), data });
+		return dispatch('submit', submitData);
 	}
 	function onBlur(this: HTMLInputElement) {
 		$errors[this.name] = { ...$errors[this.name], ...validateField(this.name, this.value) };

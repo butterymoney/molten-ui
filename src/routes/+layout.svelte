@@ -15,9 +15,9 @@
 	{#key $signer}
 		{#await getCurrentAddress() then addr}
 			{#if addr}
-				<span>👋 hi {addr.slice(0, 6)}!</span>
+				<span>👋 hi <code>{addr.slice(0, 6)}</code>!</span>
 			{:else}
-				<button on:click={connect}>Connect with Metamask</button>
+				<button on:click={connect}>connect with Metamask</button>
 			{/if}
 		{/await}
 	{/key}
