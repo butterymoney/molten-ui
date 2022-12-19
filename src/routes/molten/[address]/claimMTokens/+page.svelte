@@ -56,14 +56,16 @@
 {#if $moltenFundingData && $depositTokenData && $mTokenData}
 	<h1>Claim {$mTokenData.name}</h1>
 	{#if $moltenFundingData.exchangeTime.valueOf() == 0}]
-		<em>{$mTokenData.name} not claimable: exchange not yet happened.</em>
+		<p class="text-xs"><em>{$mTokenData.name} not claimable: exchange not yet happened.</em></p>
 	{:else if $moltenFundingData.liquidationTime.valueOf() > 0}
-		<em
-			>{$mTokenData.name} not claimable: liquidation already happened. You can now
-			<a href="../claim">claim your DAO tokens</a>.</em
-		>
+		<p class="text-xs">
+			<em
+				>{$mTokenData.name} not claimable: liquidation already happened. You can now
+				<a href="../claim">claim your DAO tokens</a>.</em
+			>
+		</p>
 	{:else if $moltenFundingData._mTokensClaimed}
-		<em>{$mTokenData.name} already claimed.</em>
+		<p class="text-xs"><em>{$mTokenData.name} already claimed.</em></p>
 	{:else}
 		<Form {formMeta} on:submit={submitClaimMTokens}>
 			<h2>Claim mTokens</h2>

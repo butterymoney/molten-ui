@@ -160,7 +160,7 @@
 	</h1>
 
 	{#if $moltenFundingData.exchangeTime.valueOf() > 0}
-		<em>Exchange already happened.</em>
+	<p class="text-xs"><em>Exchange already happened.</em></p>
 	{:else}
 		<Form formMeta={depositFormMeta} on:submit={submitDeposit} bind:this={depositForm}>
 			<h2>Deposit</h2>

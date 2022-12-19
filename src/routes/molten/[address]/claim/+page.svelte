@@ -60,18 +60,25 @@
 {#if $moltenFundingData && $depositTokenData && $daoTokenData}
 	<h1>Claim {$daoTokenData.name}</h1>
 	{#if $moltenFundingData.exchangeTime.valueOf() == 0}]
-		<em>{$daoTokenData.name} not claimable: exchange not yet happened.</em>
+		<p class="text-xs"><em>{$daoTokenData.name} not claimable: exchange not yet happened.</em></p>
 	{:else if $moltenFundingData.liquidationTime.valueOf() == 0}
-		<em>{$daoTokenData.name} not claimable: liquidation not yet happened.</em>
+		<p class="text-xs">
+			<em>{$daoTokenData.name} not claimable: liquidation not yet happened.</em>
+		</p>
 	{:else if $mTokenData.totalSupply == 0n}
-		<em
-			>All {$mTokenData.name} burned. No more {$daoTokenData.name} to claim in this Molten funding contract.</em
-		>
+		<p class="text-xs">
+			<em
+				>All {$mTokenData.name} burned. No more {$daoTokenData.name} to claim in this Molten funding
+				contract.</em
+			>
+		</p>
 	{:else if $mTokenData._balance == 0n}
-		<em
-			>You don't have any {$mTokenData.name}, so you can't claim any {$daoTokenData.name} held in this
-			contract.</em
-		>
+		<p class="text-xs">
+			<em
+				>You don't have any {$mTokenData.name}, so you can't claim any {$daoTokenData.name} held in this
+				contract.</em
+			>
+		</p>
 	{:else}
 		<Form {formMeta} on:submit={submitClaimMTokens}>
 			<h2>Claim DAO governance tokens</h2>
