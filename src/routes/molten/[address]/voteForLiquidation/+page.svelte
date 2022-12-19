@@ -22,11 +22,13 @@
 	</h1>
 
 	{#if $moltenFundingData.liquidationTime.valueOf() > 0}
-		<em>Liquidation already happened.</em>
+		<p class="text-xs"><em>Liquidation already happened.</em></p>
 	{:else if $moltenFundingData.exchangeTime.valueOf() == 0}
-		<em>Exchange not yet happened</em>
+		<p class="text-xs"><em>Exchange not yet happened</em></p>
 	{:else if new Date().valueOf() >= $moltenFundingData.exchangeTime.valueOf() + $moltenFundingData.lockingDuration * 1000}
-		<em>Lock expired. Liquidation is <a href="./liquidate">already accessible</a>.</em>
+		<p class="text-xs">
+			<em>Lock expired. Liquidation is <a href="./liquidate">already accessible</a>.</em>
+		</p>
 	{:else}
 		<p>
 			There are {$moltenFundingData.totalVotesForLiquidation /

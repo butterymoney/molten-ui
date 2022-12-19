@@ -51,8 +51,7 @@
 
 	// 👓 MoltenFunding.liquidate
 	const getLockEnd = () =>
-		$moltenFundingData.exchangeTime.valueOf() +
-		$moltenFundingData.lockingDuration * 1000;
+		$moltenFundingData.exchangeTime.valueOf() + $moltenFundingData.lockingDuration * 1000;
 	const getLockEnded = () => new Date().valueOf() >= getLockEnd();
 	const getUnanimousLiquidationVote = () =>
 		$moltenFundingData.totalVotesForLiquidation == $moltenFundingData.totalDeposited;
@@ -61,28 +60,36 @@
 <h1>Liquidate Molten funding contract {$page.params.address.slice(0, 6)}…</h1>
 {#if $moltenFundingData && $daoTokenData && $depositTokenData && $mTokenData}
 	{#if $moltenFundingData.liquidationTime.valueOf() > 0}
-		<em>Liquidation already happened. You can now <a href="./claim">claim your DAO tokens</a>.</em>
+		<p class="text-xs">
+			<em>Liquidation already happened. You can now <a href="./claim">claim your DAO tokens</a>.</em
+			>
+		</p>
 	{:else if $moltenFundingData.exchangeTime.valueOf() == 0}
-		<em>Exchange not happended yet, nothing to liquidate.</em>
+		<p class="text-xs"><em>Exchange not happended yet, nothing to liquidate.</em></p>
 	{:else if !getLockEnded() && !getUnanimousLiquidationVote()}
-		<em
-			>Liquidation not yet applicable.
-			<ul>
-				<li>Time lock only ends on {new Date(getLockEnd())}.</li>
-				<li>
-					Liquidation votes are not unanimous, only {$moltenFundingData.totalVotesForLiquidation} on
-					{$moltenFundingData.totalDeposited / 10n ** BigInt($depositTokenData.decimals)} voted for it.
-				</li>
-			</ul>
-		</em>
+		<p class="text-xs">
+			<em
+				>Liquidation not yet applicable.
+				<ul>
+					<li>Time lock only ends on {new Date(getLockEnd())}.</li>
+					<li>
+						Liquidation votes are not unanimous, only {$moltenFundingData.totalVotesForLiquidation} on
+						{$moltenFundingData.totalDeposited / 10n ** BigInt($depositTokenData.decimals)} voted for
+						it.
+					</li>
+				</ul>
+			</em>
+		</p>
 	{:else}
-		<em>
-			Liquidation is applicable thanks to:
-			<ul>
-				{#if getLockEnded()}<li>Lock ended on {new Date(getLockEnd())}.</li>{/if}
-				{#if getUnanimousLiquidationVote()}<li>Unanimous vote for liquidation.</li>{/if}
-			</ul>
-		</em>
+		<p class="text-xs">
+			<em>
+				Liquidation is applicable thanks to:
+				<ul>
+					{#if getLockEnded()}<li>Lock ended on {new Date(getLockEnd())}.</li>{/if}
+					{#if getUnanimousLiquidationVote()}<li>Unanimous vote for liquidation.</li>{/if}
+				</ul>
+			</em>
+		</p>
 		<h2>This will liquidate the Molten funding contract</h2>
 		<p>
 			This will allow {$mTokenData.name} holders to burn them to claim their share of {$daoTokenData._moltenBalance /
