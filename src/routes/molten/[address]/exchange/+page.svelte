@@ -20,7 +20,7 @@
 	const formMeta = {};
 
 	const submitExchange = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		if (!$signer || !e?.detail?.valid) return;
 
 		error = '';
 		notifications = [];
@@ -100,7 +100,7 @@
 			{$depositTokenData.symbol}
 		</h2>
 		<Form {formMeta} on:submit={submitExchange}>
-			<button type="submit" disabled={$signer === null || lock}>Exchange</button>
+			<button type="submit" disabled={!$signer || lock}>Exchange</button>
 			{#if error}
 				<Error message={error} />
 			{/if}

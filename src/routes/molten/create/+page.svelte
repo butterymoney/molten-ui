@@ -40,7 +40,7 @@
 	const submitCreation = async (e: CustomEvent<SubmitData>) => {
 		const cleanedData = e?.detail?.cleanedData;
 
-		if ($signer === null || !e?.detail?.valid || !cleanedData) return;
+		if (!$signer || !e?.detail?.valid || !cleanedData) return;
 
 		error = '';
 		notifications = [];
@@ -75,105 +75,93 @@
 	};
 </script>
 
-<h1>Create a Molten funding contract</h1>
+<div class="flex-1 p-4">
+	<h1>Create a Molten funding contract</h1>
 
-<Form {formMeta} on:submit={submitCreation}>
-	<div>
-		<Input
-			class="input-address"
-			label="DAO token address"
-			name="daoTokenAddress"
-			value="0x49E30Ae70C314A5b6f95cAF9E891eD20485195E4"
-		/>
-		<InputErrors fieldName="daoTokenAddress" />
-	</div>
-	<div>
-		<Input label="Locking duration (in days)" name="_lockingDuration" placeholder="365" />
-		<InputErrors fieldName="_lockingDuration" />
-	</div>
-	<div>
-		<Input
-			class="input-address"
-			label="Deposit token address"
-			name="depositTokenAddress"
-			value="0xb9d450a832785b66d4f99849ad664bcf9eaeacd5"
-		/>
-		<InputErrors fieldName="depositTokenAddress" />
-	</div>
-	<div>
-		<Input
-			class="input-address"
-			label="DAO treasury address"
-			name="_daoTreasuryAddress"
-			value="0x35495dc87c7a569b097932ab0ffaccec9e1309e0"
-		/>
-		<InputErrors fieldName="_daoTreasuryAddress" />
-	</div>
-	<div>
-		<Input
-			class="input-address"
-			label="Uniswap v3 oracle address"
-			name="uniswapV3OracleAddress"
-			value="0x7849342c3ef5ac4292b39de4dca7e76fe94732eb"
-		/>
-		<InputErrors fieldName="uniswapV3OracleAddress" />
-	</div>
-	<div class="input-disabled">
-		<Input
-			class="input-address"
-			label="Uniswap pool"
-			name="_uniswapV3OraclePools"
-			placeholder="0x4242…"
-			disabled
-		/>
-		<InputErrors fieldName="_uniswapV3OraclePools" />
-	</div>
-	<div class="input-disabled">
-		<label for="_uniswapV3OracleTokens">Uniswap token path</label>
-		<Input
-			class="input-address"
-			label=""
-			name="_uniswapV3OracleTokens"
-			placeholder="0x4242…"
-			disabled
-		/>
-		<Input
-			class="input-address"
-			label=""
-			name="_uniswapV3OracleTokens"
-			placeholder="0x4242…"
-			disabled
-		/>
-		<InputErrors fieldName="_uniswapV3OracleTokens" />
-	</div>
-	<div class="input-disabled">
-		<Input
-			label="Uniswap oracle period (in days)"
-			name="_uniswapV3OraclePeriod"
-			placeholder="7"
-			disabled
-		/>
-		<InputErrors fieldName="_uniswapV3OraclePeriod" />
-	</div>
-	<button type="submit" disabled={$signer === null || lock}>Create</button>
-	{#if error}
-		<Error message={error} />
-	{/if}
-	{#if notifications.length}
-		<Notification messages={notifications} />
-	{/if}
-</Form>
-
-<style>
-	* {
-		box-sizing: border-box;
-	}
-
-	.input-disabled {
-		color: darkgray;
-	}
-
-	:global(.input-address) {
-		min-width: 30em;
-	}
-</style>
+	<Form {formMeta} on:submit={submitCreation}>
+		<div>
+			<Input
+				class="code min-w-[26em]"
+				label="DAO token address"
+				name="daoTokenAddress"
+				value="0x49E30Ae70C314A5b6f95cAF9E891eD20485195E4"
+			/>
+			<InputErrors fieldName="daoTokenAddress" />
+		</div>
+		<div>
+			<Input label="Locking duration (in days)" name="_lockingDuration" placeholder="365" />
+			<InputErrors fieldName="_lockingDuration" />
+		</div>
+		<div>
+			<Input
+				class="code min-w-[26em]"
+				label="Deposit token address"
+				name="depositTokenAddress"
+				value="0xb9d450a832785b66d4f99849ad664bcf9eaeacd5"
+			/>
+			<InputErrors fieldName="depositTokenAddress" />
+		</div>
+		<div>
+			<Input
+				class="code min-w-[26em]"
+				label="DAO treasury address"
+				name="_daoTreasuryAddress"
+				value="0x35495dc87c7a569b097932ab0ffaccec9e1309e0"
+			/>
+			<InputErrors fieldName="_daoTreasuryAddress" />
+		</div>
+		<div>
+			<Input
+				class="code min-w-[26em]"
+				label="Uniswap v3 oracle address"
+				name="uniswapV3OracleAddress"
+				value="0x7849342c3ef5ac4292b39de4dca7e76fe94732eb"
+			/>
+			<InputErrors fieldName="uniswapV3OracleAddress" />
+		</div>
+		<div class="text-gray-300">
+			<Input
+				class="code min-w-[26em]"
+				label="Uniswap pool"
+				name="_uniswapV3OraclePools"
+				placeholder="0x4242…"
+				disabled
+			/>
+			<InputErrors fieldName="_uniswapV3OraclePools" />
+		</div>
+		<div class="text-gray-300">
+			<label for="_uniswapV3OracleTokens">Uniswap token path</label>
+			<Input
+				class="code min-w-[26em]"
+				label=""
+				name="_uniswapV3OracleTokens"
+				placeholder="0x4242…"
+				disabled
+			/>
+			<Input
+				class="code min-w-[26em]"
+				label=""
+				name="_uniswapV3OracleTokens"
+				placeholder="0x4242…"
+				disabled
+			/>
+			<InputErrors fieldName="_uniswapV3OracleTokens" />
+		</div>
+		<div class="text-gray-300">
+			<Input
+				label="Uniswap oracle period (in days)"
+				name="_uniswapV3OraclePeriod"
+				placeholder="7"
+				disabled
+			/>
+			<InputErrors fieldName="_uniswapV3OraclePeriod" />
+		</div>
+		<button type="submit" disabled={!$signer || lock}>Create</button>
+		{#if error}
+			<Error message={error} />
+		{/if}
+		{#if notifications.length}
+			<Notification messages={notifications} />
+		{/if}
+	</Form>
+</div>

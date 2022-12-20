@@ -35,12 +35,13 @@
 	);
 
 	const submitDeposit = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		if (!$signer || !e?.detail?.valid || !e?.detail?.cleanedData) return;
 
 		depositError = '';
 		depositNotifications = [];
 		lock = true;
-		const amount = BigInt(e.detail.data.amount) * 10n ** BigInt($depositTokenData.decimals);
+		// [TODO] Use a cleaner to translate cleanedData.amount in weis (same for other forms).
+		const amount = BigInt(e.detail.cleanedData.amount) * 10n ** BigInt($depositTokenData.decimals);
 
 		let allowanceTx: ethers.ContractTransaction | undefined;
 		let depositTx: ethers.ContractTransaction | undefined;
@@ -61,7 +62,7 @@
 						} allowance for Molten funding contract ${$moltenFundingData.address.slice(
 							0,
 							6
-						)} to ${BigInt(e.detail.data.amount)}.`
+						)} to ${BigInt(e.detail.cleanedData.amount)} ${$depositTokenData.symbol}.`
 					];
 				}
 			}
@@ -77,7 +78,7 @@
 					depositReceipt = await depositTx.wait();
 					depositNotifications = [
 						...depositNotifications,
-						`✅ Completed deposit of ${BigInt(e.detail.data.amount)} ${$depositTokenData.symbol}.`
+						`✅ Completed deposit of ${BigInt(e.detail.cleanedData.amount)} ${$depositTokenData.symbol}.`
 					];
 					$moltenStateUpdates = [...$moltenStateUpdates, depositReceipt];
 				}
@@ -115,11 +116,11 @@
 	);
 
 	const submitRefund = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		if (!$signer || !e?.detail?.valid || !e?.detail?.cleanedData) return;
 		refundError = '';
 		refundNotifications = [];
 		lock = true;
-		const amount = BigInt(e.detail.data.amount) * 10n ** BigInt($depositTokenData.decimals);
+		const amount = BigInt(e.detail.cleanedData.amount) * 10n ** BigInt($depositTokenData.decimals);
 
 		let refundTx: ethers.ContractTransaction | undefined;
 		try {
@@ -134,7 +135,7 @@
 					refundReceipt = await refundTx.wait();
 					refundNotifications = [
 						...refundNotifications,
-						`✅ Completed refund of ${BigInt(e.detail.data.amount)} ${$depositTokenData.symbol}.`
+						`✅ Completed refund of ${BigInt(e.detail.cleanedData.amount)} ${$depositTokenData.symbol}.`
 					];
 					$moltenStateUpdates = [...$moltenStateUpdates, refundReceipt];
 				}
@@ -178,7 +179,7 @@
 				/>
 				<Errors fieldName="amount" />
 			</div>
-			<button type="submit" disabled={$signer === null || lock}>Deposit</button>
+			<button type="submit" disabled={!$signer || lock}>Deposit</button>
 			{#if depositError}
 				<Error message={depositError} />
 			{/if}
@@ -203,7 +204,7 @@
 				/>
 				<Errors fieldName="amount" />
 			</div>
-			<button type="submit" disabled={$signer === null || lock}>Withdraw</button>
+			<button type="submit" disabled={!$signer || lock}>Withdraw</button>
 			{#if refundError}
 				<Error message={refundError} />
 			{/if}

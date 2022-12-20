@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
 	export type FormMeta = {
-		[fieldName: string]: { validators: ValidatorFn[]; cleaners: CleanerFn[] };
+		[fieldName: string]: { validators: ValidatorFn[]; cleaners?: CleanerFn[] };
 	};
 	export type FormErrors = { [fieldName: string]: ValidatorResult };
 	export type FormContext = { errors: Writable<FormErrors>; onBlur: (event: Event) => void };
@@ -48,11 +48,13 @@
 			}),
 			{} as FormErrors
 		);
-	const cleanField = (fieldName: string, value: string): any =>
-		formMeta[fieldName].cleaners.reduce(
-			(cleanedValueAcc, cleaner) => cleaner(cleanedValueAcc),
-			value
-		);
+	const cleanField = (fieldName: string, value: string): any => {
+		const cleaners = formMeta[fieldName].cleaners;
+		if (cleaners)
+			return cleaners.reduce((cleanedValueAcc, cleaner) => cleaner(cleanedValueAcc), value);
+		return value;
+	};
+
 	const cleanFormData = (data: { [fieldName: string]: any }): { [fieldName: string]: any } =>
 		Object.entries(data).reduce(
 			(cleanedDataAcc, [fieldName, value]) => ({
