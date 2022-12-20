@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 
-    import type {FormContext} from './Form.svelte'
+	import type { FormContext } from './Form.svelte';
 
 	export let type = 'text';
 	export let label: string;

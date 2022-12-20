@@ -84,14 +84,20 @@
 <h1>Exchange your treasury tokens for molten deposits</h1>
 {#if $moltenFundingData && $daoTokenData && $depositTokenData && signerAddress}
 	{#if $moltenFundingData.exchangeTime.valueOf() > 0}
-	<p class="text-xs"><em>Exchange already happened. You can now <a href="./claimMTokens">claim your mTokens</a>.</em></p>
+		<p class="text-xs">
+			<em
+				>Exchange already happened. You can now <a href="./claimMTokens">claim your mTokens</a>.</em
+			>
+		</p>
 	{:else if signerAddress != $moltenFundingData.daoTreasuryAddress}
-	<p class="text-xs"><em
-			>Exchange is only available to the DAO treasury address: {$moltenFundingData.daoTreasuryAddress.slice(
-				0,
-				6
-			)}…</em
-		></p>
+		<p class="text-xs">
+			<em
+				>Exchange is only available to the DAO treasury address: {$moltenFundingData.daoTreasuryAddress.slice(
+					0,
+					6
+				)}…</em
+			>
+		</p>
 	{:else}
 		<!-- [TODO] Fetch swap details from the oracle -->
 		<h2>
