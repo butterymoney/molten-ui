@@ -78,7 +78,9 @@
 					depositReceipt = await depositTx.wait();
 					depositNotifications = [
 						...depositNotifications,
-						`✅ Completed deposit of ${BigInt(e.detail.cleanedData.amount)} ${$depositTokenData.symbol}.`
+						`✅ Completed deposit of ${BigInt(e.detail.cleanedData.amount)} ${
+							$depositTokenData.symbol
+						}.`
 					];
 					$moltenStateUpdates = [...$moltenStateUpdates, depositReceipt];
 				}
@@ -135,7 +137,9 @@
 					refundReceipt = await refundTx.wait();
 					refundNotifications = [
 						...refundNotifications,
-						`✅ Completed refund of ${BigInt(e.detail.cleanedData.amount)} ${$depositTokenData.symbol}.`
+						`✅ Completed refund of ${BigInt(e.detail.cleanedData.amount)} ${
+							$depositTokenData.symbol
+						}.`
 					];
 					$moltenStateUpdates = [...$moltenStateUpdates, refundReceipt];
 				}
@@ -161,7 +165,7 @@
 	</h1>
 
 	{#if $moltenFundingData.exchangeTime.valueOf() > 0}
-	<p class="text-xs"><em>Exchange already happened.</em></p>
+		<p class="text-xs"><em>Exchange already happened.</em></p>
 	{:else}
 		<Form formMeta={depositFormMeta} on:submit={submitDeposit} bind:this={depositForm}>
 			<h2>Deposit</h2>

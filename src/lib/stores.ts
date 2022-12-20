@@ -38,15 +38,15 @@ export const depositTokenData = derived<
 >([signer, moltenFundingData, moltenStateUpdates], ([$signer, $moltenFundingData], set) => {
 	$signer && $moltenFundingData && loadDepositToken($signer, $moltenFundingData).then(set);
 });
-export const daoTokenData = derived<[typeof signer, typeof moltenFundingData, typeof moltenStateUpdates], DaoTokenData>(
-	[signer, moltenFundingData, moltenStateUpdates],
-	([$signer, $moltenFundingData], set) => {
-		$signer && $moltenFundingData && loadDaoToken($signer, $moltenFundingData).then(set);
-	}
-);
-export const mTokenData = derived<[typeof signer, typeof moltenFundingData, typeof moltenStateUpdates], MTokenData> (
-	[signer, moltenFundingData, moltenStateUpdates],
-	([$signer, $moltenFundingData], set) => {
-		$signer && $moltenFundingData && loadMToken($signer, $moltenFundingData).then(set);
-	}
-)
+export const daoTokenData = derived<
+	[typeof signer, typeof moltenFundingData, typeof moltenStateUpdates],
+	DaoTokenData
+>([signer, moltenFundingData, moltenStateUpdates], ([$signer, $moltenFundingData], set) => {
+	$signer && $moltenFundingData && loadDaoToken($signer, $moltenFundingData).then(set);
+});
+export const mTokenData = derived<
+	[typeof signer, typeof moltenFundingData, typeof moltenStateUpdates],
+	MTokenData
+>([signer, moltenFundingData, moltenStateUpdates], ([$signer, $moltenFundingData], set) => {
+	$signer && $moltenFundingData && loadMToken($signer, $moltenFundingData).then(set);
+});
