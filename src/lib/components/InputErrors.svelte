@@ -7,7 +7,7 @@
 	export let fieldName: string;
 </script>
 
-{#each Object.entries($errors?.[fieldName] || {}) as [errorName, message ], index (errorName)}
+{#each Object.entries($errors?.[fieldName] || {}) as [errorName, message ] (errorName)}
 	{#if message !== null}
 		<p class="error-message errtype-{errorName}">{message}</p>
 	{/if}

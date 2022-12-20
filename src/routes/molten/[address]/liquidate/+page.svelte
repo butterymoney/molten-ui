@@ -22,7 +22,7 @@
 	const formMeta = {};
 
 	const submitExchange = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		if (!$signer || !e?.detail?.valid) return;
 
 		error = '';
 		notifications = [];
@@ -98,7 +98,7 @@
 		</p>
 		<p>Also, {$mTokenData.name} will be forever non-transferrable.</p>
 		<Form {formMeta} on:submit={submitExchange}>
-			<button type="submit" disabled={$signer === null || lock}>Liquidate</button>
+			<button type="submit" disabled={!$signer || lock}>Liquidate</button>
 			{#if error}
 				<Error message={error} />
 			{/if}

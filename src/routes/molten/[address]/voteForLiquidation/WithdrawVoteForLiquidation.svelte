@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
 	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
-	import { moltenFundingData, moltenStateUpdates, depositTokenData, signer } from '$lib/stores';
+	import { moltenFundingData, moltenStateUpdates, signer } from '$lib/stores';
 	import Form, { type FormMeta, type SubmitData } from '$lib/components/Form.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Errors from '$lib/components/InputErrors.svelte';
 	import Error from '$lib/components/Error.svelte';
 	import Notification from '$lib/components/Notification.svelte';
 	import { isAddress, required, type ValidatorFn } from '$lib/validators';
 	import { withdrawVoteForLiquidation } from '$lib/adapters';
 
-    export const handleSubmitStart = () => {};
-    export const handleSubmitEnd = () => {};
-    export const lock: boolean = false;
+	export let handleSubmitStart: () => void;
+	export let handleSubmitEnd: () => void;
+	export let lock = false;
 
 	const moltenFundingInterface = new ethers.utils.Interface(MOLTEN_FUNDING_CONTRACT.abi);
 
@@ -34,9 +32,9 @@
 	);
 
 	const submit = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		if (!$signer || !e?.detail?.valid) return;
 
-        handleSubmitStart();
+		handleSubmitStart();
 
 		error = '';
 		notifications = [];
@@ -49,27 +47,32 @@
 				if (tx) {
 					notifications = [...notifications, '⏱ Awaiting withdraw vote transaction to validate…'];
 					$moltenStateUpdates = [...$moltenStateUpdates, await tx.wait()];
-					notifications = [
-						...notifications,
-						`✅ Vote withdrawn.`
-					];
+					notifications = [...notifications, `✅ Vote withdrawn.`];
 				}
 			}
 		} catch (err) {
 			error = 'Transaction aborted';
+			if (err instanceof Object) {
+				const errWithReason = err as { reason?: any };
+				if (typeof errWithReason.reason === 'string' && errWithReason.reason)
+					error = errWithReason.reason;
+			}
 			return;
 		} finally {
 			handleSubmitEnd();
 		}
 
-		setTimeout(() => form.reset && form.reset(), 1000);
+		setTimeout(() => {
+			form && form.reset();
+			notifications = [];
+			error = '';
+		}, 1000);
 	};
 </script>
 
-{#if $moltenFundingData._votedForLiquidation}<h2>You already voted.</h2>
-{:else}
+{#if $moltenFundingData && $moltenFundingData._votedForLiquidation}
 	<Form {formMeta} on:submit={submit} bind:this={form}>
-		<button type="submit" disabled={$signer === null || lock}>Withdraw votes</button>
+		<button type="submit" disabled={!$signer || lock}>Withdraw votes</button>
 		{#if error}
 			<Error message={error} />
 		{/if}

@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { ethers } from 'ethers';
-	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
 	import { page } from '$app/stores';
-	import { moltenFundingData, moltenStateUpdates, depositTokenData, signer } from '$lib/stores';
-	import { isAddress, required, type ValidatorFn } from '$lib/validators';
+	import { moltenFundingData, depositTokenData } from '$lib/stores';
 	import VoteForLiquidation from './VoteForLiquidation.svelte';
 	import WithdrawVoteForLiquidation from './WithdrawVoteForLiquidation.svelte';
 
@@ -39,8 +36,11 @@
 			You have a voting power of {$moltenFundingData._deposited /
 				10n ** BigInt($depositTokenData.decimals)}.
 		</p>
-		<VoteForLiquidation {handleSubmitStart} {handleSubmitEnd} />
-		<WithdrawVoteForLiquidation {handleSubmitStart} {handleSubmitEnd} />
+		<p>
+			{#if $moltenFundingData._votedForLiquidation}You have voted{:else}You haven't voted{/if}.
+		</p>
+		<VoteForLiquidation {handleSubmitStart} {handleSubmitEnd} {lock} />
+		<WithdrawVoteForLiquidation {handleSubmitStart} {handleSubmitEnd} {lock} />
 	{/if}
 {:else}
 	<h1>Vote for liquidating contract {$page.params.address.slice(0, 6)}…</h1>

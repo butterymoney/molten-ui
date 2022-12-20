@@ -25,4 +25,6 @@
 	{/key}
 </header>
 
-<slot />
+<div class="relative min-h-screen md:flex">
+	<slot />
+</div>

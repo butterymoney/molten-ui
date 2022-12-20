@@ -20,7 +20,7 @@
 	const formMeta = {};
 
 	const submitClaimMTokens = async (e: CustomEvent<SubmitData>) => {
-		if ($signer === null || !e?.detail?.valid) return;
+		if (!$signer || !e?.detail?.valid) return;
 
 		error = '';
 		notifications = [];
@@ -70,7 +70,7 @@
 		<Form {formMeta} on:submit={submitClaimMTokens}>
 			<h2>Claim mTokens</h2>
 			<p>{getClaimableMTokensBalance()} {$mTokenData.symbol} to claim.</p>
-			<button type="submit" disabled={$signer === null || lock}>Claim</button>
+			<button type="submit" disabled={!$signer || lock}>Claim</button>
 			{#if error}
 				<Error message={error} />
 			{/if}
