@@ -50,15 +50,17 @@
 	};
 
 	// 👓 MoltenFunding.liquidate
-	const getLockEnd = () =>
+	$: lockEnd =
+		$moltenFundingData &&
 		$moltenFundingData.exchangeTime.valueOf() + $moltenFundingData.lockingDuration * 1000;
-	const getLockEnded = () => new Date().valueOf() >= getLockEnd();
-	const getUnanimousLiquidationVote = () =>
+	$: lockEnded = lockEnd === undefined ? undefined : new Date().valueOf() >= lockEnd;
+	$: unanimousLiquidationVote =
+		$moltenFundingData &&
 		$moltenFundingData.totalVotesForLiquidation == $moltenFundingData.totalDeposited;
 </script>
 
 <h1>Liquidate Molten funding contract {$page.params.address.slice(0, 6)}…</h1>
-{#if $moltenFundingData && $daoTokenData && $depositTokenData && $mTokenData}
+{#if $moltenFundingData && $daoTokenData && $depositTokenData && $mTokenData && lockEnded !== undefined}
 	{#if $moltenFundingData.liquidationTime.valueOf() > 0}
 		<p class="text-xs">
 			<em>Liquidation already happened. You can now <a href="./claim">claim your DAO tokens</a>.</em
@@ -66,12 +68,12 @@
 		</p>
 	{:else if $moltenFundingData.exchangeTime.valueOf() == 0}
 		<p class="text-xs"><em>Exchange not happended yet, nothing to liquidate.</em></p>
-	{:else if !getLockEnded() && !getUnanimousLiquidationVote()}
+	{:else if !lockEnded && !unanimousLiquidationVote}
 		<p class="text-xs">
 			<em
 				>Liquidation not yet applicable.
 				<ul>
-					<li>Time lock only ends on {new Date(getLockEnd())}.</li>
+					<li>Time lock only ends on {new Date(lockEnd)}.</li>
 					<li>
 						Liquidation votes are not unanimous, only {$moltenFundingData.totalVotesForLiquidation} on
 						{$moltenFundingData.totalDeposited / 10n ** BigInt($depositTokenData.decimals)} voted for
@@ -85,8 +87,8 @@
 			<em>
 				Liquidation is applicable thanks to:
 				<ul>
-					{#if getLockEnded()}<li>Lock ended on {new Date(getLockEnd())}.</li>{/if}
-					{#if getUnanimousLiquidationVote()}<li>Unanimous vote for liquidation.</li>{/if}
+					{#if lockEnded}<li>Lock ended on {new Date(lockEnd)}.</li>{/if}
+					{#if unanimousLiquidationVote}<li>Unanimous vote for liquidation.</li>{/if}
 				</ul>
 			</em>
 		</p>

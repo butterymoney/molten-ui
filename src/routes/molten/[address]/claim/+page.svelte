@@ -49,15 +49,24 @@
 	};
 
 	// 👓 MoltenFunding.claim
-	const getClaimableMTokensBalance = () =>
+	$: claimableMTokensBalance =
+		$moltenFundingData &&
+		$mTokenData &&
 		($moltenFundingData._deposited * 10n ** BigInt($mTokenData.decimals)) /
-		$moltenFundingData.exchangeRate;
-	const getUnclaimedMTokenBalance = () =>
-		$moltenFundingData._mTokensClaimed ? 0n : getClaimableMTokensBalance();
-	const getClaimableBalance = () => $mTokenData._balance + getUnclaimedMTokenBalance();
+			$moltenFundingData.exchangeRate;
+	$: unclaimedMTokenBalance =
+		claimableMTokensBalance === undefined
+			? undefined
+			: $moltenFundingData._mTokensClaimed
+			? 0n
+			: claimableMTokensBalance;
+	$: claimableBalance =
+		unclaimedMTokenBalance === undefined
+			? undefined
+			: $mTokenData._balance + unclaimedMTokenBalance;
 </script>
 
-{#if $moltenFundingData && $depositTokenData && $daoTokenData}
+{#if $moltenFundingData && $depositTokenData && $daoTokenData && claimableBalance}
 	<h1>Claim {$daoTokenData.name}</h1>
 	{#if $moltenFundingData.exchangeTime.valueOf() == 0}]
 		<p class="text-xs"><em>{$daoTokenData.name} not claimable: exchange not yet happened.</em></p>
@@ -83,7 +92,7 @@
 		<Form {formMeta} on:submit={submitClaimMTokens}>
 			<h2>Claim DAO governance tokens</h2>
 			<p>
-				{getClaimableBalance() / 10n ** BigInt($daoTokenData.decimals)}
+				{claimableBalance / 10n ** BigInt($daoTokenData.decimals)}
 				{$daoTokenData.symbol} to claim.
 			</p>
 			<button type="submit" disabled={!$signer || lock}>Claim</button>
