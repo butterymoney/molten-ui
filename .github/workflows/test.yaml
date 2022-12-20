@@ -1,0 +1,24 @@
+name: Test
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+
+jobs:
+  javascript-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - name: Install
+        run: npm ci --dev
+      - name: Typescript check
+        run: npx tsc --noEmit
+      - name: Svelte check
+        run: npx svelte-check
+      - name: Eslint check
+        run: npx eslint .
+      - name: Prettier check
+        run: npx prettier --check .
