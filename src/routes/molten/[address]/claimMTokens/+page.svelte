@@ -48,12 +48,14 @@
 	};
 
 	// 👓 MoltenFunding.claimMTokens
-	const getClaimableMTokensBalance = () =>
+	$: claimableMTokensBalance =
+		$moltenFundingData &&
+		$mTokenData &&
 		($moltenFundingData._deposited * 10n ** BigInt($mTokenData.decimals)) /
-		$moltenFundingData.exchangeRate;
+			$moltenFundingData.exchangeRate;
 </script>
 
-{#if $moltenFundingData && $depositTokenData && $mTokenData}
+{#if $moltenFundingData && $depositTokenData && $mTokenData && claimableMTokensBalance !== undefined}
 	<h1>Claim {$mTokenData.name}</h1>
 	{#if $moltenFundingData.exchangeTime.valueOf() == 0}]
 		<p class="text-xs"><em>{$mTokenData.name} not claimable: exchange not yet happened.</em></p>
@@ -69,7 +71,10 @@
 	{:else}
 		<Form {formMeta} on:submit={submitClaimMTokens}>
 			<h2>Claim mTokens</h2>
-			<p>{getClaimableMTokensBalance()} {$mTokenData.symbol} to claim.</p>
+			<p>
+				{claimableMTokensBalance / 10n ** BigInt($mTokenData.decimals)}
+				{$mTokenData.symbol} to claim.
+			</p>
 			<button type="submit" disabled={!$signer || lock}>Claim</button>
 			{#if error}
 				<Error message={error} />
