@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
+import MOLTEN_FUNDING_CONTRACT from '@buttergov/molten-core/out/MoltenFunding.sol/MoltenFunding.json';
 import ERC20_ABI from '$lib/abis/erc20.json';
 
 // 🙏 https://stackoverflow.com/a/44054159/931156
