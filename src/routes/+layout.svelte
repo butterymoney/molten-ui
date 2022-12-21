@@ -19,7 +19,10 @@
 			{#if addr}
 				<span>👋 hi <code>{addr.slice(0, 6)}</code>!</span>
 			{:else}
-				<button on:click={connect}>connect with Metamask</button>
+				<button
+					class="rounded px-2 py-1 bg-gray-300 hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-400"
+					on:click={connect}>connect with Metamask</button
+				>
 			{/if}
 		{/await}
 	{/key}
