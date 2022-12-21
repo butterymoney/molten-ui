@@ -14,11 +14,7 @@ jobs:
           cache: 'npm'
       - name: Install
         run: npm ci --dev
-      - name: Typescript check
-        run: npx tsc --noEmit
-      - name: Svelte check
-        run: npx svelte-check
-      - name: Eslint check
-        run: npx eslint .
-      - name: Prettier check
-        run: npx prettier --check .
+      - name: Check
+        run: npm run check
+      - name: Lint
+        run: npm run lint
