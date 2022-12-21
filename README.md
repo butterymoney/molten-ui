@@ -4,7 +4,7 @@ A simple UI for creating and interacting with a Molten funding contract.
 
 ## Installing
 
-You need to link this repo to the `molten` repo (npm pacakge `@molten/core`).
+You need to link this repo to the `molten` repo (npm pacakge `@buttergov/molten-core`).
 
 First go the to `molten` repo and do:
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
-	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
+	import MOLTEN_FUNDING_CONTRACT from '@buttergov/molten-core/out/MoltenFunding.sol/MoltenFunding.json';
 	import { page } from '$app/stores';
 	import { moltenFundingData, moltenStateUpdates, depositTokenData, signer } from '$lib/stores';
 	import Form, { type FormMeta, type SubmitData } from '$lib/components/Form.svelte';

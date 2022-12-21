@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ethers } from 'ethers';
-	import MOLTEN_FUNDING_CONTRACT from '@molten/core/out/MoltenFunding.sol/MoltenFunding.json';
+	import MOLTEN_FUNDING_CONTRACT from '@buttergov/molten-core/out/MoltenFunding.sol/MoltenFunding.json';
 	import { signer, moltenStateUpdates } from '$lib/stores';
 	import { required, isAddress, type ValidatorFn } from '$lib/validators';
 	import { daysToSeconds, type CleanerFn } from '$lib/cleaners';
